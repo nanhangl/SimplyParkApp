@@ -6,7 +6,7 @@ import Geolocation from '@react-native-community/geolocation';
 import CarparksArray from '../../assets/carparks_01032021.json';
 import CarparksTest from '../../assets/carparks_test.json';
 import axios from 'axios';
-import _ from 'lodash';
+// import _ from 'lodash';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faParking } from '@fortawesome/free-solid-svg-icons'
 
@@ -56,6 +56,7 @@ const homeScreen = ({navigation}) => {
                 return <Marker
                 key={item.x_coord.toString() + "_" + item.y_coord.toString()}
                 coordinate={{latitude:coords[1],longitude:coords[0]}}
+                onPress={() => console.log(item.car_park_no)}
                 >
                     <View style={{alignItems:'center'}}>
                         <View style={{backgroundColor:'#3e3e3e',paddingVertical:5,width:45,borderRadius:5}}>
@@ -157,10 +158,12 @@ const homeScreen = ({navigation}) => {
                 </TouchableOpacity>
             </View>
             <View>
-                <View style={{backgroundColor:'#f0f0f0',width:'92%',height:50,margin:15,marginBottom:5,borderRadius:5,alignItems:'center',flexDirection:'row'}}>
-                    <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
-                    <Text style={[styles.medium,{fontSize:12,width:'90%',marginLeft:10,color:'#888'}]}>Search by Address, Postal Code, or Carpark No.</Text>
-                </View>
+                <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+                    <View style={{backgroundColor:'#f0f0f0',width:'92%',height:50,margin:15,marginBottom:5,borderRadius:5,alignItems:'center',flexDirection:'row'}}>
+                        <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
+                        <Text style={[styles.medium,{fontSize:18,width:'90%',marginLeft:10,color:'#777'}]}>Search by Address or Carpark No.</Text>
+                    </View>
+                </TouchableOpacity>
                 <View style={{marginHorizontal:15,maxHeight:'50%'}}>
                     <ScrollView style={{flexGrow:0}}>
                         {carparkAvailability ? renderNearestCarparks(CarparksArray).map(item => item) : <></>}
