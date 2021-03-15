@@ -12,12 +12,12 @@ var proj4 = require('proj4');
 const homeScreen = ({navigation}) => {
     const [locationInfo, setLocationInfo] = useState({"coords":{"longitude":1.3521,"latitude":103.8198}});
     const [refreshLocation, setRefreshLocation] = useState('');
-    const [carparkAvailability, setCarparkAvailability] = useState();
+    const [carparkAvailability, setCarparkAvailability] = useState(false);
 
     useEffect(async () => {
         Geolocation.getCurrentPosition(info => setLocationInfo(info))
         const carparkAvailabilityApi = await axios.get("https://api.data.gov.sg/v1/transport/carpark-availability");
-        setCarparkAvailability(carparkAvailabilityApi);
+        setCarparkAvailability(carparkAvailabilityApi.data);
     }, [refreshLocation])
 
     Geolocation.watchPosition(info => setLocationInfo(info), () => {}, {distanceFilter:50, maximumAge:0, timeout:1000, enableHighAccuracy:true})
@@ -31,20 +31,19 @@ const homeScreen = ({navigation}) => {
       }
 
     const getLotsAvailable = carparkNo => {
-        // carparkAvailability.items[0].carpark_data.map(cp => {
-                                    //     if (cp.carpark_number == item.car_park_no) {
-                                    //         return cp.carpark_info[0].lots_available
-                                    //     }
-                                    // })
         try {
-            for (var item in carparkAvailability.items[0].carpark_data) {
-                console.log(item);
+            var cpInfo = carparkAvailability.items[0].carpark_data;
+            for (var item in cpInfo) {
+                if (cpInfo[item].carpark_number == carparkNo) {
+                    return cpInfo[item].carpark_info[0].lots_available;
+                }
             }
         } catch {}
     }
 
-    const renderCarparks = cpArray => (
-        cpArray.map((item) => {
+    const renderCarparks = cpArray => {
+        
+        const cpMarkers = cpArray.map((item) => {
             var coords = proj4("EPSG:3414","EPSG:4326",[item.x_coord,item.y_coord]);
             if (distance(locationInfo.coords.latitude,locationInfo.coords.longitude,coords[1],coords[0]) <= 20) {
                 return <Marker
@@ -52,16 +51,18 @@ const homeScreen = ({navigation}) => {
                 coordinate={{latitude:coords[1],longitude:coords[0]}}
                 >
                     <View style={{alignItems:'center'}}>
-                        <View style={{backgroundColor:'#3e3e3e',paddingVertical:5,paddingHorizontal:8,borderRadius:5}}>
-                            <Text style={[styles.medium,{color:'#fff'}]}>
-                                {getLotsAvailable()}
+                        <View style={{backgroundColor:'#3e3e3e',paddingVertical:5,width:45,borderRadius:5}}>
+                            <Text style={[styles.medium,{color:'#fff',textAlign:'center'}]}>
+                                {getLotsAvailable(item.car_park_no) || "NA"}
                             </Text>
                         </View>
                         <View style={styles.mapPin} />
                     </View>
                 </Marker>
         }})
-    )
+
+        return cpMarkers;
+    }
 
     return (
         <View style={{height:'100%',backgroundColor:'#fff'}}>
@@ -94,7 +95,7 @@ const homeScreen = ({navigation}) => {
             <View style={{alignItems:'center'}}>
                 <View style={{backgroundColor:'#f0f0f0',width:'92%',height:50,margin:15,borderRadius:5,alignItems:'center',flexDirection:'row'}}>
                     <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
-                    <TextInput style={[styles.medium,{fontSize:12,width:'90%',height:50,marginLeft:10}]} placeholder="Search by Address, Postal Code, or Carpark No." placeholderTextColor="#a0a0a0" />
+                    <Text style={[styles.medium,{fontSize:12,width:'90%',marginLeft:10,color:'#888'}]}>Search by Address, Postal Code, or Carpark No.</Text>
                 </View>
             </View>
         </View>
