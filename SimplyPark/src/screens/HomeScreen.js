@@ -17,11 +17,14 @@ const homeScreen = ({navigation}) => {
     const [refreshLocation, setRefreshLocation] = useState('');
     const [carparkAvailability, setCarparkAvailability] = useState(false);
     const [cpRadius, setCpRadius] = useState(20);
+    const [lastUpdated, setLastUpdated] = useState('');
 
     useEffect(async () => {
         Geolocation.getCurrentPosition(info => setLocationInfo(info))
         const carparkAvailabilityApi = await axios.get("https://api.data.gov.sg/v1/transport/carpark-availability");
         setCarparkAvailability(carparkAvailabilityApi.data);
+        const updatedDateTime = new Date(carparkAvailabilityApi.data.items[0].timestamp);
+        setLastUpdated(`${updatedDateTime.getHours().toString().padStart(2,'0')}:${updatedDateTime.getMinutes().toString().padStart(2,'0')}`)
     }, [refreshLocation])
 
     Geolocation.watchPosition(info => setLocationInfo(info), () => {}, {distanceFilter:50, maximumAge:0, timeout:1000, enableHighAccuracy:true})
@@ -75,39 +78,54 @@ const homeScreen = ({navigation}) => {
             var coords = proj4("EPSG:3414","EPSG:4326",[cpArray[item].x_coord,cpArray[item].y_coord]);
             var cpDist = distance(locationInfo.coords.latitude,locationInfo.coords.longitude,coords[1],coords[0]);
             if (cpDist <= cpRadius) {
-                var lotsAvailable = 0;
-                try {
-                    lotsAvailable = parseInt(getLotsAvailable(cpArray[item].car_park_no));
-                } catch {}
-
-                if (lotsAvailable == 0) {
-                    nearestCarparksComponentArray.push(
-                        <TouchableOpacity>
-                            <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
-                                <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
-                                <View style={{marginLeft:15,marginRight:40}}>
-                                    <Text style={styles.medium}>{cpArray[item].address}</Text>
-                                    <Text style={[styles.regular,{marginTop:5,color:'#888'}]}>No lots | {Math.round(cpDist * 10) / 10} km away</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                } else {
-                    nearestCarparksComponentArray.push(
-                        <TouchableOpacity>
-                            <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
-                                <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
-                                <View style={{marginLeft:15,marginRight:40}}>
-                                    <Text style={styles.medium}>{cpArray[item].address}</Text>
-                                    <Text style={[styles.regular,{marginTop:5,color:'#888'}]}>{ lotsAvailable } {lotsAvailable == 1 ? 'lot' : 'lots' } | {Math.round(cpDist * 10) / 10} km away</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                }
+                nearestCarparksArray.push([cpArray[item], cpDist]);
             }
         }
-        return nearestCarparksArray;
+
+        nearestCarparksArray.sort((a,b) => a[1] - b[1])
+
+        for (var item in nearestCarparksArray) {
+            var lotsAvailable = parseInt(getLotsAvailable(nearestCarparksArray[item][0].car_park_no));
+
+            if (lotsAvailable == 0) {
+                nearestCarparksComponentArray.push(
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address}>
+                        <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
+                            <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
+                            <View style={{marginLeft:15,marginRight:15}}>
+                                <Text style={styles.medium}>{nearestCarparksArray[item][0].address}</Text>
+                                <Text style={[styles.regular,{marginTop:5,color:'#888'}]}>No lots | {Math.round(nearestCarparksArray[item][1] * 10) / 10} km away</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                );
+            } else if (isNaN(lotsAvailable)) {
+                nearestCarparksComponentArray.push(
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address}>
+                        <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
+                            <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
+                            <View style={{marginLeft:15,marginRight:15}}>
+                                <Text style={styles.medium}>{nearestCarparksArray[item][0].address}</Text>
+                                <Text style={[styles.regular,{marginTop:5,color:'#888'}]}>No Data | {Math.round(nearestCarparksArray[item][1] * 10) / 10} km away</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                );
+            } else {
+                nearestCarparksComponentArray.push(
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address}>
+                        <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
+                            <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
+                            <View style={{marginLeft:15,marginRight:40}}>
+                                <Text style={styles.medium}>{nearestCarparksArray[item][0].address}</Text>
+                                <Text style={[styles.regular,{marginTop:5,color:'#888'}]}>{ lotsAvailable } {lotsAvailable == 1 ? 'lot' : 'lots' } | {Math.round(nearestCarparksArray[item][1] * 10) / 10} km away</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                );
+            }
+        }
+        return nearestCarparksComponentArray;
     }
 
     return (
@@ -143,11 +161,12 @@ const homeScreen = ({navigation}) => {
                     <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
                     <Text style={[styles.medium,{fontSize:12,width:'90%',marginLeft:10,color:'#888'}]}>Search by Address, Postal Code, or Carpark No.</Text>
                 </View>
-                <View style={{marginHorizontal:15}}>
-                    <ScrollView>
+                <View style={{marginHorizontal:15,maxHeight:'50%'}}>
+                    <ScrollView style={{flexGrow:0}}>
                         {carparkAvailability ? renderNearestCarparks(CarparksArray).map(item => item) : <></>}
                     </ScrollView>
                 </View>
+                <View style={{flex:1}}><Text style={[styles.medium,{textAlign:'center'}]}>Last Updated at {lastUpdated}</Text></View>
             </View>
         </View>
     )
