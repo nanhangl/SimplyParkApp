@@ -24,7 +24,7 @@ const homeScreen = ({navigation}) => {
         const carparkAvailabilityApi = await axios.get("https://api.data.gov.sg/v1/transport/carpark-availability");
         setCarparkAvailability(carparkAvailabilityApi.data);
         const updatedDateTime = new Date(carparkAvailabilityApi.data.items[0].timestamp);
-        setLastUpdated(`${updatedDateTime.getHours().toString().padStart(2,'0')}:${updatedDateTime.getMinutes().toString().padStart(2,'0')}`)
+        setLastUpdated(`Last Updated at ${updatedDateTime.getHours().toString().padStart(2,'0')}:${updatedDateTime.getMinutes().toString().padStart(2,'0')}`)
     }, [refreshLocation])
 
     Geolocation.watchPosition(info => setLocationInfo(info), () => {}, {distanceFilter:50, maximumAge:0, timeout:1000, enableHighAccuracy:true})
@@ -86,11 +86,11 @@ const homeScreen = ({navigation}) => {
         nearestCarparksArray.sort((a,b) => a[1] - b[1])
 
         for (var item in nearestCarparksArray) {
-            var lotsAvailable = parseInt(getLotsAvailable(nearestCarparksArray[item][0].car_park_no));
-
+            const cpItem = nearestCarparksArray[item][0];
+            const lotsAvailable = parseInt(getLotsAvailable(cpItem.car_park_no));
             if (lotsAvailable == 0) {
                 nearestCarparksComponentArray.push(
-                    <TouchableOpacity key={nearestCarparksArray[item][0].address}>
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address} onPress={() => navigation.navigate("Carpark Info", {"info":cpItem,"lotsAvailable":lotsAvailable})}>
                         <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
                             <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
                             <View style={{marginLeft:15,marginRight:15}}>
@@ -102,7 +102,7 @@ const homeScreen = ({navigation}) => {
                 );
             } else if (isNaN(lotsAvailable)) {
                 nearestCarparksComponentArray.push(
-                    <TouchableOpacity key={nearestCarparksArray[item][0].address}>
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address} onPress={() => navigation.navigate("Carpark Info", {"info":cpItem,"lotsAvailable":lotsAvailable})}>
                         <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
                             <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
                             <View style={{marginLeft:15,marginRight:15}}>
@@ -114,8 +114,8 @@ const homeScreen = ({navigation}) => {
                 );
             } else {
                 nearestCarparksComponentArray.push(
-                    <TouchableOpacity key={nearestCarparksArray[item][0].address}>
-                        <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address} onPress={() => navigation.navigate("Carpark Info", {"info":cpItem,"lotsAvailable":lotsAvailable})}>
+                        <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}} onPress={() => console.log("You clicked on " + nearestCarparksArray[item][0].address)}>
                             <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
                             <View style={{marginLeft:15,marginRight:40}}>
                                 <Text style={styles.medium}>{nearestCarparksArray[item][0].address}</Text>
@@ -131,9 +131,9 @@ const homeScreen = ({navigation}) => {
 
     return (
         <View style={{height:'100%',backgroundColor:'#fff'}}>
-            <TouchableOpacity style={{position:'absolute',zIndex:2,backgroundColor:'#fff',margin:10,padding:10,shadowColor:"#000",shadowOffset:{width:0,height:4},shadowOpacity:0.25,shadowRadius:8,elevation:8,marginVertical:7.5,borderRadius:10}}>
+            {/* <TouchableOpacity style={{position:'absolute',zIndex:2,backgroundColor:'#fff',margin:10,padding:10,shadowColor:"#000",shadowOffset:{width:0,height:4},shadowOpacity:0.25,shadowRadius:8,elevation:8,marginVertical:7.5,borderRadius:10}}>
                 <Feather.Menu width={25} height={25} stroke="#404040" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <View style={{height:'60%',overflow:'hidden'}}>
                 <MapView
                     initialRegion={{
@@ -161,7 +161,7 @@ const homeScreen = ({navigation}) => {
                 <TouchableOpacity onPress={() => navigation.navigate('Search')}>
                     <View style={{backgroundColor:'#f0f0f0',width:'92%',height:50,margin:15,marginBottom:5,borderRadius:5,alignItems:'center',flexDirection:'row'}}>
                         <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
-                        <Text style={[styles.medium,{fontSize:18,width:'90%',marginLeft:10,color:'#777'}]}>Search by Address or Carpark No.</Text>
+                        <Text style={[styles.medium,{fontSize:17,width:'90%',marginLeft:10,color:'#777'}]}>Search by Address or Carpark No.</Text>
                     </View>
                 </TouchableOpacity>
                 <View style={{marginHorizontal:15,maxHeight:'50%'}}>
@@ -169,7 +169,7 @@ const homeScreen = ({navigation}) => {
                         {carparkAvailability ? renderNearestCarparks(CarparksArray).map(item => item) : <></>}
                     </ScrollView>
                 </View>
-                <View style={{flex:1}}><Text style={[styles.medium,{textAlign:'center'}]}>Last Updated at {lastUpdated}</Text></View>
+                {/* <View style={{flex:1}}><Text style={[styles.medium,{textAlign:'center'}]}>{lastUpdated}</Text></View> */}
             </View>
         </View>
     )
