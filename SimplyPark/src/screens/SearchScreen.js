@@ -44,6 +44,8 @@ const searchScreen = ({navigation}) => {
     const renderSearchedCarparks = (cpArray, searchTerm) => {
         var nearestCarparksArray = [];
         var nearestCarparksComponentArray = [];
+
+        if (searchTerm.length >= 3) {
         
         for (var item in cpArray) {
             var coords = proj4("EPSG:3414","EPSG:4326",[cpArray[item].x_coord,cpArray[item].y_coord]);
@@ -95,6 +97,7 @@ const searchScreen = ({navigation}) => {
             }
         }
         setSearchedCarparks(nearestCarparksComponentArray);
+    }
     }
 
     return (
