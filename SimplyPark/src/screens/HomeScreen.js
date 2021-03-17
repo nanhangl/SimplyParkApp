@@ -53,15 +53,15 @@ const homeScreen = ({navigation}) => {
             var coords = proj4("EPSG:3414","EPSG:4326",[item.x_coord,item.y_coord]);
             var cpDist = distance(locationInfo.coords.latitude,locationInfo.coords.longitude,coords[1],coords[0]);
             if (cpDist <= cpRadius) {
+                const lotsAvailable = getLotsAvailable(item.car_park_no);
                 return <Marker
                 key={item.x_coord.toString() + "_" + item.y_coord.toString()}
                 coordinate={{latitude:coords[1],longitude:coords[0]}}
-                onPress={() => console.log(item.car_park_no)}
-                >
+                onPress={() => navigation.navigate("Carpark Info", {"info":item,"lotsAvailable":lotsAvailable || 'NA'})} >
                     <View style={{alignItems:'center'}}>
                         <View style={{backgroundColor:'#3e3e3e',paddingVertical:5,width:45,borderRadius:5}}>
                             <Text style={[styles.medium,{color:'#fff',textAlign:'center'}]}>
-                                {getLotsAvailable(item.car_park_no) || "NA"}
+                                {lotsAvailable || "NA"}
                             </Text>
                         </View>
                         <View style={styles.mapPin} />

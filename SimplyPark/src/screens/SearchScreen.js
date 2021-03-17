@@ -14,6 +14,7 @@ const searchScreen = ({navigation}) => {
     const [refreshLocation, setRefreshLocation] = useState('');
     const [carparkAvailability, setCarparkAvailability] = useState(false);
     const [searchedCarparks, setSearchedCarparks] = useState(<></>);
+    const [showSuggestionText, setShowSuggestionText] = useState('flex');
 
     useEffect(async () => {
         //Geolocation.getCurrentPosition(info => setLocationInfo(info))
@@ -45,8 +46,6 @@ const searchScreen = ({navigation}) => {
     const renderSearchedCarparks = (cpArray, searchTerm) => {
         var nearestCarparksArray = [];
         var nearestCarparksComponentArray = [];
-
-        if (searchTerm.length >= 3) {
         
         for (var item in cpArray) {
             if (cpArray[item].address.toLowerCase().includes(searchTerm) || cpArray[item].car_park_no.toLowerCase().includes(searchTerm)) {
@@ -55,11 +54,12 @@ const searchScreen = ({navigation}) => {
         }
 
         for (var item in nearestCarparksArray) {
-            var lotsAvailable = parseInt(getLotsAvailable(nearestCarparksArray[item][0].car_park_no));
+            const carpark = nearestCarparksArray[item][0];
+            const lotsAvailable = parseInt(getLotsAvailable(carpark.car_park_no));
 
             if (lotsAvailable == 0) {
                 nearestCarparksComponentArray.push(
-                    <TouchableOpacity key={nearestCarparksArray[item][0].address + "_" + Math.random()}>
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address + "_" + Math.random()} onPress={() => navigation.navigate("Carpark Info", {"info":carpark,"lotsAvailable":lotsAvailable})}>
                         <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
                             <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
                             <View style={{marginLeft:15,marginRight:15}}>
@@ -71,7 +71,7 @@ const searchScreen = ({navigation}) => {
                 );
             } else if (isNaN(lotsAvailable)) {
                 nearestCarparksComponentArray.push(
-                    <TouchableOpacity key={nearestCarparksArray[item][0].address + "_" + Math.random()}>
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address + "_" + Math.random()} onPress={() => navigation.navigate("Carpark Info", {"info":carpark,"lotsAvailable":lotsAvailable||'NA'})}>
                         <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
                             <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
                             <View style={{marginLeft:15,marginRight:15}}>
@@ -83,7 +83,7 @@ const searchScreen = ({navigation}) => {
                 );
             } else {
                 nearestCarparksComponentArray.push(
-                    <TouchableOpacity key={nearestCarparksArray[item][0].address + "_" + Math.random()}>
+                    <TouchableOpacity key={nearestCarparksArray[item][0].address + "_" + Math.random()} onPress={() => navigation.navigate("Carpark Info", {"info":carpark,"lotsAvailable":lotsAvailable})}>
                         <View style={{flexDirection:'row',alignItems:'center',borderBottomColor:'#d0d0d0',borderBottomWidth:1,paddingVertical:10}}>
                             <FontAwesomeIcon icon={faParking} color="#086EB5" size={25} />
                             <View style={{marginLeft:15,marginRight:40}}>
@@ -95,20 +95,34 @@ const searchScreen = ({navigation}) => {
                 );
             }
         }
+        if (nearestCarparksComponentArray.length == 0) {
+            nearestCarparksComponentArray.push(<View key="no_result"><Text style={[styles.bold,{textAlign:'center',marginTop:20}]}>No Result</Text></View>);
+        }
         setSearchedCarparks(nearestCarparksComponentArray);
-    }
     }
 
     return (
         <View style={{height:'100%',backgroundColor:'#fff'}}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Feather.ChevronLeft width={40} height={40} stroke="#404040" style={{marginLeft:10,marginTop:10}} />
-            </TouchableOpacity>
+            <View style={{flexDirection:'row',alignItems:'center'}}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Feather.ChevronLeft width={40} height={40} stroke="#404040" style={{marginLeft:10,marginTop:10}} />
+                </TouchableOpacity>
+                <Text style={[styles.bold,{fontSize:20,marginTop:7,marginLeft:15}]}>Search</Text>
+            </View>
             <View style={{backgroundColor:'#f0f0f0',width:'92%',height:50,margin:15,marginBottom:5,borderRadius:5,alignItems:'center',flexDirection:'row'}}>
                 <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
-                <TextInput onChangeText={searchTerm => searchTerm.length >= 3 ? renderSearchedCarparks(CarparksArray,searchTerm.toLowerCase()) : setSearchedCarparks(<></>)} style={[styles.medium,{fontSize:17,width:'90%',height:50,marginLeft:10,color:'#404040'}]} placeholder="Search by Address or Carpark No." placeholderTextColor="#777" />
+                <TextInput onChangeText={searchTerm => {
+                    if (searchTerm.length >= 3) {
+                        setShowSuggestionText('none');
+                        renderSearchedCarparks(CarparksArray,searchTerm.toLowerCase())
+                    } else {
+                        setSearchedCarparks(<></>);
+                        setShowSuggestionText('flex');
+                    }
+                    }} style={[styles.medium,{fontSize:17,width:'90%',height:50,marginLeft:10,color:'#404040'}]} placeholder="Search by Address or Carpark No." placeholderTextColor="#777" />
             </View>
             <View style={{marginHorizontal:15}}>
+                <Text style={[styles.bold,{textAlign:'center',marginTop:20,display:showSuggestionText}]}>Type 3 or more characters to start showing suggestions</Text>
                 <ScrollView>
                     {searchedCarparks}
                 </ScrollView>

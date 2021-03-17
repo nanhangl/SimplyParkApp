@@ -13,10 +13,11 @@ import {
     StackedBarChart
   } from "react-native-chart-kit";
 
-  const HistoricalDataScreen = () => {
+  const HistoricalDataScreen = ({ route, navigation }) => {
+
     return (
         <View style={{height:'100%',backgroundColor:'#fff'}}>
-            
+
         </View>
     )
   }

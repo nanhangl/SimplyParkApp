@@ -9,31 +9,31 @@ import MapView, { Circle, Marker } from 'react-native-maps';
 const CarparkInfoScreen = ({route, navigation}) => {
     const [carparkAvailability, setCarparkAvailability] = useState(false);
     proj4.defs("EPSG:3414","+proj=tmerc +lat_0=1.366666666666667 +lon_0=103.8333333333333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs");
-    const [carparkInfo, setCarparkInfo] = useState({"car_park_no":"","address":"","x_coord":0,"y_coord":0,"car_park_type":"","type_of_parking_system":"","short_term_parking":"","free_parking":"","night_parking":"","car_park_decks":0,"gantry_height":0,"car_park_basement":""});
-    const [lotsAvailable, setLotsAvailable] = useState('0');
-    const [coords, setCoords] = useState([0,0]);
+    const [carparkInfo, setCarparkInfo] = useState(route.params["info"]);
+    const [lotsAvailable, setLotsAvailable] = useState(route.params["lotsAvailable"]);
+    const [coords, setCoords] = useState(proj4("EPSG:3414","EPSG:4326",[carparkInfo.x_coord, carparkInfo.y_coord]));
 
     useEffect(async () => {
         const carparkAvailabilityApi = await axios.get("https://api.data.gov.sg/v1/transport/carpark-availability");
         setCarparkAvailability(carparkAvailabilityApi.data);
-        setCarparkInfo(route.params["info"]);
-        setLotsAvailable(route.params["lotsAvailable"]);
-        setCoords(proj4("EPSG:3414","EPSG:4326",[carparkInfo.x_coord, carparkInfo.y_coord]));
     }, [])
-
-    console.log(route.params)
 
     return (
         <View style={{height:'100%',backgroundColor:'#fff'}}>
             <View style={{height:'30%',overflow:'hidden'}}>
                 <MapView
+                    initialRegion={{
+                        latitude: coords[1],
+                        longitude: coords[0],
+                        latitudeDelta: 0.011,
+                        longitudeDelta: 0.011
+                    }}
                     region={{
                         latitude: coords[1],
                         longitude: coords[0],
                         latitudeDelta: 0.011,
                         longitudeDelta: 0.011
                     }}
-                    scrollEnabled={false}
                     style={styles.map} >
                         <Marker
                         coordinate={{latitude:coords[1],longitude:coords[0]}}>
