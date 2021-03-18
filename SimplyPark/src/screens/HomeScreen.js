@@ -158,7 +158,7 @@ const homeScreen = ({navigation}) => {
                 </TouchableOpacity>
             </View>
             <View>
-                <TouchableOpacity onPress={() => navigation.navigate('Search')}>
+                <TouchableOpacity onPress={() => navigation.navigate('Search')} style={{alignItems:'center'}}>
                     <View style={{backgroundColor:'#f0f0f0',width:'92%',height:50,margin:15,marginBottom:5,borderRadius:5,alignItems:'center',flexDirection:'row'}}>
                         <Feather.Search width={30} height={30} stroke="#404040" style={{marginLeft:10}} />
                         <Text style={[styles.medium,{fontSize:17,width:'90%',marginLeft:10,color:'#777'}]}>Search by Address or Carpark No.</Text>
