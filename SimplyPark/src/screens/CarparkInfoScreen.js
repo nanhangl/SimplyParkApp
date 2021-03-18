@@ -69,7 +69,7 @@ const CarparkInfoScreen = ({route, navigation}) => {
                 <Text style={styles.medium}>{carparkInfo.night_parking}</Text>
             </View>
             <View style={{width:'100%',alignItems:'center',position:'absolute', bottom:20}}>
-                <TouchableOpacity style={{width:'90%',height:50,backgroundColor:'#007AFF',justifyContent:'center'}}>
+                <TouchableOpacity style={{width:'90%',height:50,backgroundColor:'#007AFF',justifyContent:'center'}} onPress={() => navigation.navigate("Historical Data", {"car_park_no":carparkInfo.car_park_no})}>
                     <Text style={[styles.bold,{fontSize:20,textAlign:'center',color:'#fff'}]}>View Historical Data</Text>
                 </TouchableOpacity>
             </View>
