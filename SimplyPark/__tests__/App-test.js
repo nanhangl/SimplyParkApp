@@ -8,7 +8,9 @@ import App from '../App';
 
 // Note: test renderer must be required after react-native.
 import renderer from 'react-test-renderer';
+import homeScreen from '../src/screens/HomeScreen';
 
-it('renders correctly', () => {
-  renderer.create(<App />);
-});
+test('Home renders correctly', () => {
+  const tree = render.create(<homeScreen />).toJSON()
+  expect(tree).toMatchSnapshot();
+})

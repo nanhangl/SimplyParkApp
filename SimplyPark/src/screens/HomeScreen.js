@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, RefreshControl } from 'react-native';
 import MapView, { Circle, Marker } from 'react-native-maps';
 import * as Feather from "react-native-feather";
 import Geolocation from '@react-native-community/geolocation';
