@@ -4,7 +4,6 @@ import * as Feather from "react-native-feather";
 import CarparksArray from '../../assets/carparks_01032021.json';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
-var moment = require('moment-timezone');
 var proj4 = require('proj4');
 import {
     LineChart,
@@ -118,43 +117,41 @@ import { resolvePlugin, resolvePreset } from '@babel/core';
                     <ActivityIndicator size='large' color="#007AFF" />
                     <Text style={[styles.medium,{marginTop:5}]}>This will take approx. 10 secs</Text>
                 </View>
-                { lastHourData[0].length == 6 ? 
-                 <LineChart 
-                 data={{
-                     labels: lastHourData[0],
-                     datasets: [
-                         {
-                             data: lastHourData[1]
-                         }
-                     ]
-                 }}
-                 width={Dimensions.get('window').width-50}
-                 height={200}
-                 yAxisSuffix=" lots"
-                 chartConfig={{
-                     backgroundColor: "#007AFF",
-                     backgroundGradientFrom: "#007AFF",
-                     backgroundGradientTo: "#007AFF",
-                     decimalPlaces: 0, // optional, defaults to 2dp
-                     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                     style: {
-                       borderRadius: 16
-                     },
-                     propsForDots: {
-                       r: "6",
-                       strokeWidth: "2",
-                       stroke: "#007AFF"
-                     }
-                   }}
-                   bezier
-                   style={{
-                     marginVertical: 8,
-                     borderRadius: 16
-                   }} />
-                 : 
-                 <></> 
-                 }
+                <LineChart 
+                    data={{
+                        labels: lastHourChart[0],
+                        datasets: [
+                            {
+                                data: lastHourChart[1]
+                            }
+                        ]
+                    }}
+                    width={Dimensions.get('window').width-50}
+                    height={200}
+                    yAxisSuffix=" lots"
+                    yAxisInterval={10}
+                    chartConfig={{
+                        backgroundColor: "#007AFF",
+                        backgroundGradientFrom: "#007AFF",
+                        backgroundGradientTo: "#007AFF",
+                        decimalPlaces: 0, // optional, defaults to 2dp
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                          borderRadius: 16
+                        },
+                        propsForDots: {
+                          r: "6",
+                          strokeWidth: "2",
+                          stroke: "#007AFF"
+                        }
+                      }}
+                      bezier
+                      style={{
+                        marginVertical: 8,
+                        borderRadius: 16,
+                        display: lastHourLoader[2]
+                      }} />
             </View>
             <View style={{marginHorizontal:25, marginTop:15,height:'30%'}}>
                 <Text style={[styles.bold, {fontSize:20}]}>Last 24 Hours</Text>
