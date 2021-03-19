@@ -136,7 +136,7 @@ import { resolvePlugin, resolvePreset } from '@babel/core';
                 <Text style={[styles.medium, {marginTop:15,display:dataLoader[1]}]}>Cannot Retrieve Data</Text>
                 <View style={{justifyContent:'center',height:'80%',display:dataLoader[0],alignItems:'center'}}>
                     <ActivityIndicator size='large' color="#007AFF" />
-                    <Text style={[styles.medium,{marginTop:5}]}>This will take approx. {route.params["type"] == "Hourly" ? "10 secs" : "a min."}</Text>
+                    <Text style={[styles.medium,{marginTop:5}]}>This will take approx. {route.params["type"] == "Hourly" ? "10 secs" : "a min"}</Text>
                 </View>
                 { graphData[0].length == dataSetsAmt ? 
                  <LineChart 
